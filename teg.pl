@@ -64,7 +64,7 @@ estaEnContinente(Jugador, Continente):-
     ocupa(Pais, Jugador, _ ),
     paisContinente(Continente, Pais).
 
-% 2
+% 3
 ocupaContinente(Jugador, Continente):-
     continente(Continente),
     jugador(Jugador),
