@@ -115,6 +115,30 @@ sonLimitrofes2(Pais1, Pais2):-
 - ocupa más de 10 países
 - o tiene más de 50 ejercitos.
 */
+% paisOcupado(Pais, Ejercitos):- ocupa(Pais, _, Ejercitos).
+tiene(Jugador, Pais, Ejercitos):- ocupa(Pais, Jugador, Ejercitos).
+esGroso(Jugador):-
+    jugador(Jugador),
+    forall(paisImportante(Pais), ocupa(Pais, Jugador, _)).
+
+esGroso(Jugador):-
+    paisesJugador(Jugador, Paises),
+    length(Paises, CantidadPaises),
+    CantidadPaises > 10.
+
+esGroso(Jugador):-
+    paisesJugador(Jugador, Paises),
+    maplist(tiene(Jugador), Paises, Cantidades),   
+    sum_list(Cantidades, Total),
+    Total > 50.
+
+paisesJugador(Jugador, Paises):-
+    jugador(Jugador),
+    findall(Pais, 
+            ocupa(Pais, Jugador, _), 
+            Paises).
+
+
 
 % 7
 % estaEnElHorno/1: un país está en el horno si todos sus países limítrofes están ocupados
