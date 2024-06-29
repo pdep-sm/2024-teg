@@ -60,13 +60,17 @@ objetivo(verde, destruirJugador(rojo)).
 objetivo(negro, ocuparContinente(europa)).
 
 % 1
-% estaEnContinente/2: Relaciona un jugador y un continente si el jugador ocupa al menos un país en el continente
+% estaEnContinente/2: Relaciona un jugador y un continente si el jugador ocupa al menos un país en el continente.
 estaEnContinente(Jugador, Continente):-
     ocupa(Pais, Jugador, _ ),
     paisContinente(Continente, Pais).
 
 % 2
 % cantidadPaises/2: Relaciona a un jugador con la cantidad de países que ocupa.
+cantidadPaises(Jugador, Cantidad):-
+    jugador(Jugador),
+    findall(Pais, ocupa(Pais, Jugador, _), Paises),
+    length(Paises, Cantidad).
 
 % 3
 % ocupaContinente/2: Relaciona un jugador y un continente si el jugador ocupa totalmente al continente.
@@ -84,9 +88,26 @@ jugador(Jugador):- objetivo(Jugador, _).
 % 4 
 % leFaltaMucho/2: Relaciona a un jugador y un continente si al jugador le falta 
 % ocupar más de 2 países de dicho continente.
+leFaltaMucho(Jugador, Continente):-
+    jugador(Jugador),
+    continente(Continente),
+    /*estaEnContinente(Jugador, Continente),*/
+    findall(Pais, (paisContinente(Continente, Pais), not(ocupa(Pais, Jugador, _))), Paises),
+    length(Paises, Cantidad),
+    Cantidad > 2.
 
 % 5 
 % sonLimitrofes/2: Relaciona 2 países si son limítrofes.
+sonLimitrofes(Pais1, Pais2):-
+    limitrofes([Pais1, Pais2]).
+sonLimitrofes(Pais1, Pais2):-
+    limitrofes([Pais2, Pais1]).
+
+sonLimitrofes2(Pais1, Pais2):-
+    limitrofes(Paises),
+    member(Pais1, Paises),
+    member(Pais2, Paises),
+    Pais1 \= Pais2.
 
 % 6 
 /* esGroso/1: Un jugador es groso si cumple algunas de estas condiciones:
@@ -98,6 +119,19 @@ jugador(Jugador):- objetivo(Jugador, _).
 % 7
 % estaEnElHorno/1: un país está en el horno si todos sus países limítrofes están ocupados
 % por el mismo jugador que no es el mismo que ocupa ese país.
+estaEnElHorno(Pais):-
+    ocupa(Pais, Jugador, _),
+    jugador(OtroJugador),
+    OtroJugador \= Jugador,
+    forall(sonLimitrofes(Pais, PaisLimitrofe), 
+           ocupa(PaisLimitrofe, OtroJugador, _)).
+/* NO HAGAN ESTO: */
+estaEnElHorno2(Pais):-
+    ocupa(Pais, Jugador, _),
+    jugador(OtroJugador),
+    OtroJugador \= Jugador,
+    findall(PaisLimitrofe, sonLimitrofes(Pais, PaisLimitrofe), Paises), /* INNECESARIO */
+    forall(member(OtroPais, Paises), ocupa(OtroPais, OtroJugador, _)).
 
 % 8
 % esCaotico/1: un continente es caótico si hay más de tres jugadores en el.
@@ -106,4 +140,4 @@ jugador(Jugador):- objetivo(Jugador, _).
 % capoCannoniere/1: es el jugador que tiene ocupado más países.
 
 % 10
-% ganadooor/1: un jugador es ganador si logro su objetivo 
+% ganadooor/1: un jugador es ganador si logro su objetivo.
